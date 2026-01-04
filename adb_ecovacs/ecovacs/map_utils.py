@@ -4,6 +4,8 @@ from typing import Optional
 
 from PIL import Image, ImageDraw
 
+from settings import MAP_UPLOAD_TARGET
+
 from .device import DeviceController
 from .navigation import Navigator
 
@@ -45,16 +47,19 @@ class MapManager:
         ImageDraw.floodfill(img, xy=(0, -1), value=(255, 255, 255, 0), thresh=25)
         img.save("adb_ecovacs/Map_cropped.png")
         print("Map screenshot saved.")
-        try:
-            subprocess.run(
-                ["scp", "adb_ecovacs/Map_cropped.png", "hassio:/root/config/www/"],
-                check=True,
-            )
-            print("File successfully copied to Home Assistant.")
-        except FileNotFoundError:
-            print("Warning: scp binary not available; install OpenSSH client or skip map uploads.")
-        except subprocess.CalledProcessError as exc:
-            print("Error during SCP:", exc)
+        if MAP_UPLOAD_TARGET:
+            try:
+                subprocess.run(
+                    ["scp", "adb_ecovacs/Map_cropped.png", MAP_UPLOAD_TARGET],
+                    check=True,
+                )
+                print("File successfully copied to Home Assistant.")
+            except FileNotFoundError:
+                print("Warning: scp binary not available; install OpenSSH client or skip map uploads.")
+            except subprocess.CalledProcessError as exc:
+                print("Error during SCP:", exc)
+        else:
+            print("Map upload target not configured; skipping map transfer.")
         self._update_map_status()
 
     def _update_map_status(self):
