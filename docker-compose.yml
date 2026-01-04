@@ -1,0 +1,26 @@
+services:
+  telnet_squeezelite:
+    image: ghcr.io/daonew/py_adbecovacs_telnetlms/telnet_squeezelite:latest
+    pull_policy: always
+    container_name: telnet_squeezelite
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - .env
+    volumes:
+      - telnet_logs:/app/logs
+
+  adb_ecovacs:
+    image: ghcr.io/daonew/py_adbecovacs_telnetlms/adb_ecovacs:latest
+    pull_policy: always
+    container_name: adb_ecovacs
+    restart: unless-stopped
+    network_mode: host
+    privileged: true
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb"
+    env_file:
+      - .env
+
+volumes:
+  telnet_logs:

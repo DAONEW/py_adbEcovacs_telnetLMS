@@ -1,0 +1,27 @@
+# Ignore virtual environments
+venv/
+venv_*/
+env/
+.venv/
+venv_android/
+
+# Ignore tests
+tests/
+.pytest_cache/
+
+# Ignore local environment configuration
+.env
+
+# Ignore compiled Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*$py.class
+
+# Logs and temporary files
+*.log
+
+# Editor folders
+.vscode/
+.idea/
