@@ -1,10 +1,15 @@
 import subprocess
 import threading
+from pathlib import Path
 from typing import Optional
 
 from PIL import Image, ImageDraw
 
-from settings import MAP_UPLOAD_TARGET
+from settings import (
+    MAP_UPLOAD_SSH_KEY_PATH,
+    MAP_UPLOAD_SSH_KNOWN_HOSTS_PATH,
+    MAP_UPLOAD_TARGET,
+)
 
 from .device import DeviceController
 from .navigation import Navigator
@@ -49,10 +54,19 @@ class MapManager:
         print("Map screenshot saved.")
         if MAP_UPLOAD_TARGET:
             try:
-                subprocess.run(
-                    ["scp", "adb_ecovacs/Map_cropped.png", MAP_UPLOAD_TARGET],
-                    check=True,
-                )
+                scp_cmd = ["scp", "-o", "StrictHostKeyChecking=accept-new"]
+                key_path_raw = MAP_UPLOAD_SSH_KEY_PATH
+                if key_path_raw:
+                    key_path = Path(key_path_raw)
+                    if key_path.is_file():
+                        scp_cmd += ["-i", key_path_raw, "-o", "IdentitiesOnly=yes"]
+                        known_hosts_path = MAP_UPLOAD_SSH_KNOWN_HOSTS_PATH
+                        if known_hosts_path:
+                            kh_file = Path(known_hosts_path)
+                            if kh_file.is_file():
+                                scp_cmd += ["-o", f"UserKnownHostsFile={known_hosts_path}"]
+                scp_cmd += ["adb_ecovacs/Map_cropped.png", MAP_UPLOAD_TARGET]
+                subprocess.run(scp_cmd, check=True)
                 print("File successfully copied to Home Assistant.")
             except FileNotFoundError:
                 print("Warning: scp binary not available; install OpenSSH client or skip map uploads.")
