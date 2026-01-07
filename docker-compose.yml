@@ -21,24 +21,5 @@ services:
       - "/dev/bus/usb:/dev/bus/usb"
     env_file:
       - .env
-    command: >
-      /bin/sh -c '
-        set -euo pipefail
-        key_path="$${MAP_UPLOAD_SSH_KEY_PATH:-/root/.ssh/id_adb_ecovacs}"
-        kh_path="$${MAP_UPLOAD_SSH_KNOWN_HOSTS_PATH:-/root/.ssh/known_hosts}"
-        ssh_dir="$(dirname "$${key_path}")"
-        install -d -m 700 "$$ssh_dir"
-        if [ -n "$${SSH_PRIVATE_KEY_BASE64:-}" ]; then
-          printf "%s" "$$SSH_PRIVATE_KEY_BASE64" | base64 -d > "$$key_path"
-          chmod 600 "$$key_path"
-        fi
-        if [ -n "$${SSH_KNOWN_HOSTS_BASE64:-}" ]; then
-          install -d -m 700 "$(dirname "$${kh_path}")"
-          printf "%s" "$$SSH_KNOWN_HOSTS_BASE64" | base64 -d > "$$kh_path"
-          chmod 644 "$$kh_path"
-        fi
-        exec python adb_ecovacs/ecovacs_app.py
-      '
-
 volumes:
   telnet_logs:
